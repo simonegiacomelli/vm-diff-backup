@@ -138,7 +138,7 @@ class xbackup(object):
                 os.system(cmd)
             return
 
-        fullBackupNameList.sort(cmp=None, key=None, reverse=True)
+        fullBackupNameList.sort(key=None, reverse=True)
         fullBackupFolderName = fullBackupNameList[0]
         fullBackupFolderPath = self._opt.backupfolder + "/" + fullBackupFolderName
 
