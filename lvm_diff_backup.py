@@ -50,6 +50,8 @@ def main():
              ok(f'mount {snapshot_device} {mount_point}') and \
              ok(f'xbackup.py --backupfolder={backup_folder} --sourcefolder={source_folder}')
 
+    print(f'backup of {vmid} ' + ('success' if all_ok else 'FAILED'))
+
     if not clean('performing post cleanup'):
         return FAIL
 
