@@ -35,7 +35,7 @@ def clean(msg):
     if ok(f'mountpoint -q {mount_point}', silent=True) and not ok(f'umount {mount_point}'):
         return False
 
-    if ok(f'lvdisplay {snapshot_device}', silent=True) and not ok(f'lvremove -fß {snapshot_device}'):
+    if ok(f'lvdisplay {snapshot_device}', silent=True) and not ok(f'lvremove -f {snapshot_device}'):
         return False
 
     return True
