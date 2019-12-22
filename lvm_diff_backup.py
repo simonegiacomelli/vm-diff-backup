@@ -44,10 +44,11 @@ for command in commands:
         exec(command[1:])
         continue
 
-    print(f'executing: {command}')
-    res = subprocess.call(command.split(' '))
+    split = command.split(' ')
+    print(f'executing: {split}')
+    res = subprocess.call(split)
     if res != 0:
-        print(f'  ' + ('ignoring ' if ignore_error else '') + 'failed result code={res}')
+        print(f'  ' + ('ignoring ' if ignore_error else '') + f'failed result code={res}')
         if not ignore_error:
             exit(1)
 
