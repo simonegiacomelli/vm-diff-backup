@@ -114,11 +114,18 @@ def backup_all():
             failed.append(vm_id)
         tee.indent_dec()
 
-    if len(failed) > 0:
-        tee.log(f'This vm backup failed: {failed}')
-        exit(1)
-    else:
-        exit(0)
+    success = len(failed) == 0
+    import platform
+
+    subject = f'soyoustart {platform.node()} backup'
+    if not success:
+        tee.log('')
+        tee.log(f'Backup failed for: {failed}')
+        tee.log('')
+        subject = f'FAILED {",".join(failed)} {subject}'
+
+    os.system(f'cat {all_log_file} | admin_email.py "{subject}"')
+    return success
 
 
 def dt_str():
@@ -126,4 +133,4 @@ def dt_str():
 
 
 if __name__ == '__main__':
-    backup_all()
+    exit(0 if backup_all() else 1)
