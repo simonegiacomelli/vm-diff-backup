@@ -4,9 +4,12 @@ import datetime
 import subprocess
 import sys
 
+FAIL = 1
+SUCCESS = 0
+
 if len(sys.argv) <= 1:
     print(f'Usage: {sys.argv[0]} VMID')
-    exit(1)
+    exit(FAIL)
 
 vmid = sys.argv[1]
 year_month = datetime.datetime.now().strftime("%Y-%m")
@@ -32,14 +35,10 @@ def clean(msg):
     if ok(f'mountpoint -q {mount_point}', silent=True) and not ok(f'umount {mount_point}'):
         return False
 
-    if ok(f'lvdisplay {snapshot_device}', silent=True) and not ok((f'lvremove -f {snapshot_device}')):
+    if ok(f'lvdisplay {snapshot_device}', silent=True) and not ok(f'lvremove -fß {snapshot_device}'):
         return False
 
     return True
-
-
-FAIL = 1
-SUCCESS = 0
 
 
 def main():
@@ -58,4 +57,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    exit(main())
