@@ -112,6 +112,7 @@ def backup_all():
         if not backup(vm_id, source_folder, backup_folder, data_device, snapshot_device, mount_point):
             failed.append(vm_id)
         tee.indent_dec()
+        tee.log('')
         tee.close(log_file)
 
     success = len(failed) == 0
