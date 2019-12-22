@@ -8,7 +8,7 @@ def ok(command: str, silent=False):
                          stdout=subprocess.PIPE,
                          stderr=subprocess.STDOUT)
     for line in iter(p.stdout.readline, b''):
-        print('  ' + line.decode('utf-8').rstrip(),flush=True)
+        print('  ' + line.decode('utf-8').rstrip(), flush=True)
     p.wait(10)
     result = p.returncode
     success = result == 0
