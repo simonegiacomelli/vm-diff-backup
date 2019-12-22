@@ -3,6 +3,7 @@
 import datetime
 import subprocess
 import sys
+from execute import ok
 
 FAIL = 1
 SUCCESS = 0
@@ -12,11 +13,17 @@ if len(sys.argv) <= 1:
     exit(FAIL)
 
 if sys.argv[1] == 'test':
+    def eprint(*args, **kwargs):
+        print(*args, file=sys.stderr, **kwargs)
+
+
     print('test mode')
     import time
 
+    eprint('this goes to stderr')
     print('wait some...')
     time.sleep(0.5)
+    ok('du -h -d 1')
     print('done')
     exit(int(sys.argv[2]))
 
@@ -28,15 +35,6 @@ data_device = '/dev/pve/data'
 
 source_folder = f'/mnt/qm-backup/images/{vmid}'
 backup_folder = f'/mnt/lvdump/xdelta3/{year_month}/backup-{vmid}'
-
-
-def ok(command: str, silent=False):
-    print(f'executing: {command}')
-    result = subprocess.call(command.split(' '))
-    success = result == 0
-    if not success and not silent:
-        print(f'  command failed result code: {result}')
-    return success
 
 
 def clean(msg):
