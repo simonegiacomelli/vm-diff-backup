@@ -3,15 +3,22 @@
 import datetime
 import subprocess
 import sys
+import os
 
 FAIL = 1
 SUCCESS = 0
 
 vm_list = ['200']
 
+folder = os.path.dirname(sys.argv[0])
 for vm in vm_list:
-    command = f'lvm_diff_backup.py {vm}'
+
+    command = f'{folder}/lvm_diff_backup.py {vm}'
     print(f'executing: {command}')
-    with open('log.txt', 'w') as log:
-        result = subprocess.call(command.split(' '), stdout=log, stderr=log)
-    print(f'  result code: {result}')
+    p = subprocess.Popen(command.split(' '),
+                         stdout=subprocess.PIPE,
+                         stderr=subprocess.STDOUT)
+    for line in iter(p.stdout.readline, b''):
+        print('  ' + line.decode('utf-8').rstrip())
+    p.wait(10)
+    print(f'  result code: {p.returncode}')

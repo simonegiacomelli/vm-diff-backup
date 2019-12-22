@@ -11,6 +11,15 @@ if len(sys.argv) <= 1:
     print(f'Usage: {sys.argv[0]} VMID')
     exit(FAIL)
 
+if sys.argv[1] == 'test':
+    print('test mode')
+    import time
+
+    print('wait some...')
+    time.sleep(0.5)
+    print('done')
+    exit(int(sys.argv[2]))
+
 vmid = sys.argv[1]
 year_month = datetime.datetime.now().strftime("%Y-%m")
 mount_point = '/mnt/qm-backup'
