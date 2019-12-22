@@ -21,6 +21,6 @@ for vm in vm_list:
                          stdout=subprocess.PIPE,
                          stderr=subprocess.STDOUT)
     for line in iter(p.stdout.readline, b''):
-        print('  ' + line.decode('utf-8').rstrip())
+        print('  ' + line.rstrip())
     p.wait(10)
     print(f'  result code: {p.returncode}')
