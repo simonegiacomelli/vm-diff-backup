@@ -3,17 +3,17 @@
 import os
 import sys
 
-from execute import ok
-
-FAIL = 1
-SUCCESS = 0
+from lvm_diff_backup import Backup
+from execute import FAIL, SUCCESS
 
 vm_list = ['200', '300']
+
 folder = os.path.dirname(sys.argv[0])
 
 failed = []
 for vm in vm_list:
-    if not ok(f'{folder}/lvm_diff_backup.py {vm}'):
+    backup = Backup(vm)
+    if not backup.execute():
         failed.append(vm)
 
 if len(failed) > 0:

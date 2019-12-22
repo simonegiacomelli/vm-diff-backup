@@ -1,5 +1,8 @@
 import subprocess
 
+FAIL = 1
+SUCCESS = 0
+
 
 def ok(command: str, silent=False, log=print):
     log(f'executing: {command}', flush=True)
