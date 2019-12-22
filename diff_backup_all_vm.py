@@ -12,9 +12,10 @@ class Tee:
         self.indent = 0
 
     def log(self, line):
+        line = (' ' * self.indent) + line
         print(line, flush=True)
         for file in self.files.values():
-            file.write((' ' * self.indent) + line + '\n')
+            file.write(line + '\n')
             file.flush()
 
     def __del__(self):
