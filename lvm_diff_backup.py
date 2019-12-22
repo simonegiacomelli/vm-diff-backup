@@ -30,7 +30,6 @@ lvcreate -L50G -s -n {snapshot_device} {data_device}
 mount {snapshot_device} {mount_point}                                                                                                               
 xbackup.py --backupfolder={backup_folder} --sourcefolder={source_folder}                                                                                  
 
-#ignore_error=True
 umount {mount_point}
 lvremove -f {snapshot_device}                                                                                                
 
