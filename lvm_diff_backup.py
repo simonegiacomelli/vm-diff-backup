@@ -37,15 +37,15 @@ lvremove -f {snapshot_device}
 """.splitlines(keepends=False)
 
 ignore_error = False
-commands = [line for line in lines if line.strip() != '']
+commands = [line.strip() for line in lines if line.strip() != '']
 
 for command in commands:
     if command.startswith('#'):
         exec(command[1:])
         continue
 
+    print(f'executing: {command}')
     split = command.split(' ')
-    print(f'executing: {split}')
     res = subprocess.call(split)
     if res != 0:
         print(f'  ' + ('ignoring ' if ignore_error else '') + f'failed result code={res}')
