@@ -5,6 +5,13 @@ import os
 import subprocess
 from typing import IO, Dict
 
+year_month = datetime.datetime.now().strftime("%Y-%m")
+all_backup_folder = f'/mnt/lvdump/xdelta3/{year_month}'
+mount_point = '/mnt/qm-backup'
+snapshot_device = '/dev/pve/qm-backup'
+data_device = '/dev/pve/data'
+vm_list = '200 100 101 111 150'.split(' ')
+
 
 class Tee:
     def __init__(self):
@@ -89,18 +96,10 @@ def backup(vm_id, source_folder, backup_folder, data_device, snapshot_device, mo
 
 
 def backup_all():
-    vm_list = '200 100 101 111 150'.split(' ')
-
-    year_month = datetime.datetime.now().strftime("%Y-%m")
-    all_backup_folder = f'/mnt/lvdump/xdelta3/{year_month}'
     all_log_file = f'{all_backup_folder}/{dt_str()}-log-all.txt'
     tee.add(all_log_file)
     tee.log(f'Backup started at {dt_str()}')
     tee.log('')
-
-    mount_point = '/mnt/qm-backup'
-    snapshot_device = '/dev/pve/qm-backup'
-    data_device = '/dev/pve/data'
 
     failed = []
     for vm_id in vm_list:
