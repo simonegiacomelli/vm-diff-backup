@@ -17,38 +17,45 @@ data_device = '/dev/pve/data'
 source_folder = f'/mnt/qm-backup/images/{vmid}'
 backup_folder = f'/mnt/lvdump/xdelta3/{year_month}/backup-{vmid}'
 
-lines = f"""
 
-#ignore_error=True
-umount {mount_point}
-lvremove -f {snapshot_device}
-
-#ignore_error=False
-mkdir -p {mount_point}
-
-lvcreate -L50G -s -n {snapshot_device} {data_device}
-mount {snapshot_device} {mount_point}
-xbackup.py --backupfolder={backup_folder} --sourcefolder={source_folder}                                                                                  
-
-umount {mount_point}
-lvremove -f {snapshot_device}                                                                                                
-
-""".splitlines(keepends=False)
-
-ignore_error = False
-commands = [line.strip() for line in lines if line.strip() != '']
-
-for command in commands:
-    if command.startswith('#'):
-        exec(command[1:])
-        continue
-
+def ok(command: str, silent=False):
     print(f'executing: {command}')
-    split = command.split(' ')
-    res = subprocess.call(split)
-    if res != 0:
-        print(f'  ' + ('ignoring ' if ignore_error else '') + f'failed result code={res}')
-        if not ignore_error:
-            exit(1)
+    result = subprocess.call(command.split(' '))
+    success = result != 0
+    if not success and not silent:
+        print(f'  command failed result code: {result}')
+    return success
 
-exit(0)
+
+def clean(msg):
+    print(msg)
+    if ok(f'mountpoint -q {mount_point}', silent=True) and not ok(f'umount {mount_point}'):
+        return False
+
+    if ok(f'lvdisplay {snapshot_device}', silent=True) and not ok((f'lvremove -f {snapshot_device}')):
+        return False
+
+    return True
+
+
+FAIL = 1
+SUCCESS = 0
+
+
+def main():
+    if not clean('performing pre cleanup'):
+        return FAIL
+
+    all_ok = ok(f'mkdir -p {mount_point}') and \
+             ok(f'lvcreate -L50G -s -n {snapshot_device} {data_device}') and \
+             ok(f'mount {snapshot_device} {mount_point}') and \
+             ok(f'xbackup.py --backupfolder={backup_folder} --sourcefolder={source_folder}')
+
+    if not clean('performing post cleanup'):
+        return FAIL
+
+    return SUCCESS if all_ok else FAIL
+
+
+if __name__ == '__main__':
+    main()
