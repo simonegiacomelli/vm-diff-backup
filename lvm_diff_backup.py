@@ -49,8 +49,9 @@ def main():
              ok(f'lvcreate -L50G -s -n {snapshot_device} {data_device}') and \
              ok(f'mount {snapshot_device} {mount_point}') and \
              ok(f'xbackup.py --backupfolder={backup_folder} --sourcefolder={source_folder}')
-
+    print('')
     print(f'backup of {vmid} ' + ('success' if all_ok else 'FAILED') + '  <------------')
+    print('')
 
     if not clean('performing post cleanup'):
         return FAIL
