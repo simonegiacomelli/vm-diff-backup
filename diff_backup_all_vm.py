@@ -89,7 +89,7 @@ def backup(vm_id, source_folder, backup_folder, data_device, snapshot_device, mo
 
 
 def backup_all():
-    vm_list = ['200', '300']
+    vm_list = '200 100 101 111 150'.split(' ')
 
     year_month = datetime.datetime.now().strftime("%Y-%m")
     all_backup_folder = f'/mnt/lvdump/xdelta3/{year_month}'
