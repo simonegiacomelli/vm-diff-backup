@@ -27,7 +27,7 @@ lvremove -f {snapshot_device}
 mkdir -p {mount_point}
 
 lvcreate -L50G -s -n {snapshot_device} {data_device}
-mount {snapshot_device} {mount_point}                                                                                                               
+mount {snapshot_device} {mount_point}
 xbackup.py --backupfolder={backup_folder} --sourcefolder={source_folder}                                                                                  
 
 umount {mount_point}
