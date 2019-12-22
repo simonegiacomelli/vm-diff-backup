@@ -10,7 +10,8 @@ SUCCESS = 0
 vm_list = ['200']
 
 for vm in vm_list:
-    command = f'lvm_diff_backup.py {vm} >> log.txt'.split(' ')
+    command = f'lvm_diff_backup.py {vm}'
     print(f'executing: {command}')
-    result = subprocess.call(command)
+    with open('log.txt', 'w') as log:
+        result = subprocess.call(command.split(' '), stdout=log, stderr=log)
     print(f'  result code: {result}')
