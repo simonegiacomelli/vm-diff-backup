@@ -13,5 +13,5 @@ def ok(command: str, silent=False):
     result = p.returncode
     success = result == 0
     if not success and not silent:
-        print(f'  command failed result code: {result}')
+        print(f'command failed result code: {result}')
     return success
