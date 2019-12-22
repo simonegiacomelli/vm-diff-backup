@@ -17,6 +17,7 @@ for vm in vm_list:
     print(f'executing: {command}')
     p = subprocess.Popen(command.split(' '),
                          bufsize=0,
+                         universal_newlines=True,
                          stdout=subprocess.PIPE,
                          stderr=subprocess.STDOUT)
     for line in iter(p.stdout.readline, b''):
