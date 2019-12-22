@@ -122,7 +122,7 @@ def backup_all():
         tee.log('')
         tee.log(f'Backup failed for: {failed}')
         tee.log('')
-        subject = f'FAILED {",".join(failed)} {subject}'
+        subject = f'{subject} FAILED [{",".join(failed)}]'
 
     os.system(f'cat {all_log_file} | admin_email.py "{subject}"')
     return success
