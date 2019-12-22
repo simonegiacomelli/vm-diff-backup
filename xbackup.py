@@ -60,10 +60,7 @@ how it works:
 
 import shutil
 import os
-from distutils import dir_util
 from optparse import OptionParser
-import sys
-import datetime
 import subprocess
 
 
