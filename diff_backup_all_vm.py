@@ -2,22 +2,117 @@
 
 import os
 import sys
+import datetime
+import subprocess
+from typing import IO, List, Dict
 
-from lvm_diff_backup import Backup
-from execute import FAIL, SUCCESS
 
-vm_list = ['200', '300']
+class Tee:
+    def __init__(self):
+        self.files: Dict[str, IO] = {}
 
-folder = os.path.dirname(sys.argv[0])
+    def log(self, line):
+        print(line, flush=True)
+        for file in self.files.values():
+            file.write(line + '\n')
+            file.flush()
 
-failed = []
-for vm in vm_list:
-    backup = Backup(vm)
-    if not backup.execute():
-        failed.append(vm)
+    def __del__(self):
+        for name in list(self.files.keys()):
+            self.close(name)
 
-if len(failed) > 0:
-    print(f'This vm backup failed: {failed}')
-    exit(FAIL)
-else:
-    exit(SUCCESS)
+    def close(self, name):
+        file = self.files.pop(name)
+        file.close()
+
+    def add(self, name):
+        basename = os.path.dirname(name)
+        os.makedirs(basename, exist_ok=True)
+        self.files[name] = open(name, 'w')
+
+
+tee = Tee()
+
+
+def ok(command: str, silent=False):
+    tee.log(f'executing: {command}')
+    p = subprocess.Popen(command.split(' '),
+                         bufsize=0,
+                         stdout=subprocess.PIPE,
+                         stderr=subprocess.STDOUT)
+    for line in iter(p.stdout.readline, b''):
+        tee.log('  ' + line.decode('utf-8').rstrip())
+    p.wait(10)
+    result = p.returncode
+    success = result == 0
+    if not success and not silent:
+        tee.log(f'command failed result code: {result}')
+    return success
+
+
+def backup(vm_id, source_folder, backup_folder, data_device, snapshot_device, mount_point):
+    def clean(msg):
+        tee.log(msg)
+        if ok(f'mountpoint -q {mount_point}', silent=True) and not ok(f'umount {mount_point}'):
+            return False
+
+        if ok(f'lvdisplay {snapshot_device}', silent=True) and not ok(f'lvremove -f {snapshot_device}'):
+            return False
+
+        return True
+
+    if not clean('performing pre cleanup'):
+        return False
+
+    all_ok = ok(f'mkdir -p {mount_point}') and \
+             ok(f'lvcreate -L50G -s -n {snapshot_device} {data_device}') and \
+             ok(f'mount {snapshot_device} {mount_point}') and \
+             ok(f'xbackup.py --backupfolder={backup_folder} --sourcefolder={source_folder}')
+
+    tee.log('')
+    tee.log(f'backup of {vm_id} ' + ('success' if all_ok else 'FAILED') + '  <------------')
+    tee.log('')
+
+    if not clean('performing post cleanup'):
+        return False
+
+    return all_ok
+
+
+def backup_all():
+    vm_list = ['200', '300']
+
+    year_month = datetime.datetime.now().strftime("%Y-%m")
+    all_backup_folder = f'/mnt/lvdump/xdelta3/{year_month}'
+    all_log_file = f'{all_backup_folder}/log-all-{dt_str()}.txt'
+    tee.add(all_log_file)
+    tee.log(f'Backup started at {dt_str()}')
+    tee.log('')
+
+    mount_point = '/mnt/qm-backup'
+    snapshot_device = '/dev/pve/qm-backup'
+    data_device = '/dev/pve/data'
+
+    failed = []
+    for vm_id in vm_list:
+        source_folder = f'/mnt/qm-backup/images/{vm_id}'
+        backup_folder = f'{all_backup_folder}/backup-{vm_id}'
+        log_file = f'{backup_folder}/log-{dt_str()}.txt'
+        tee.add(log_file)
+
+        if not backup(vm_id, source_folder, backup_folder, data_device, snapshot_device, mount_point):
+            failed.append(vm_id)
+
+    if len(failed) > 0:
+        tee.log(f'This vm backup failed: {failed}')
+        exit(1)
+    else:
+        exit(0)
+
+
+def dt_str():
+    return datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+
+
+if __name__ == '__main__':
+    backup_all()
