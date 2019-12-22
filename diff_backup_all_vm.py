@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
 
-import os
-import sys
 import datetime
+import os
 import subprocess
-from typing import IO, List, Dict
+from typing import IO, Dict
 
 
 class Tee:
     def __init__(self):
         self.files: Dict[str, IO] = {}
+        self.indent = 0
 
     def log(self, line):
         print(line, flush=True)
         for file in self.files.values():
-            file.write(line + '\n')
+            file.write((' ' * self.indent) + line + '\n')
             file.flush()
 
     def __del__(self):
@@ -30,11 +30,18 @@ class Tee:
         os.makedirs(basename, exist_ok=True)
         self.files[name] = open(name, 'w')
 
+    def indent_inc(self):
+        self.indent += 3
+
+    def indent_dec(self):
+        self.indent -= 3
+
 
 tee = Tee()
 
 
 def ok(command: str, silent=False):
+    tee.indent_inc()
     tee.log(f'executing: {command}')
     p = subprocess.Popen(command.split(' '),
                          bufsize=0,
@@ -47,6 +54,7 @@ def ok(command: str, silent=False):
     success = result == 0
     if not success and not silent:
         tee.log(f'command failed result code: {result}')
+    tee.indent_dec()
     return success
 
 
@@ -84,7 +92,7 @@ def backup_all():
 
     year_month = datetime.datetime.now().strftime("%Y-%m")
     all_backup_folder = f'/mnt/lvdump/xdelta3/{year_month}'
-    all_log_file = f'{all_backup_folder}/log-all-{dt_str()}.txt'
+    all_log_file = f'{all_backup_folder}/{dt_str()}-log-all.txt'
     tee.add(all_log_file)
     tee.log(f'Backup started at {dt_str()}')
     tee.log('')
@@ -97,11 +105,13 @@ def backup_all():
     for vm_id in vm_list:
         source_folder = f'/mnt/qm-backup/images/{vm_id}'
         backup_folder = f'{all_backup_folder}/backup-{vm_id}'
-        log_file = f'{backup_folder}/log-{dt_str()}.txt'
+        log_file = f'{backup_folder}/{dt_str()}-log.txt'
         tee.add(log_file)
-
+        tee.log(f'start backup of {vm_id}')
+        tee.indent_inc()
         if not backup(vm_id, source_folder, backup_folder, data_device, snapshot_device, mount_point):
             failed.append(vm_id)
+        tee.indent_dec()
 
     if len(failed) > 0:
         tee.log(f'This vm backup failed: {failed}')
