@@ -24,7 +24,7 @@ backup_folder = f'/mnt/lvdump/xdelta3/{year_month}/backup-{vmid}'
 def ok(command: str, silent=False):
     print(f'executing: {command}')
     result = subprocess.call(command.split(' '))
-    success = result != 0
+    success = result == 0
     if not success and not silent:
         print(f'  command failed result code: {result}')
     return success
