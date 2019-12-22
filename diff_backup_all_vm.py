@@ -16,6 +16,7 @@ for vm in vm_list:
     command = f'{folder}/lvm_diff_backup.py {vm}'
     print(f'executing: {command}')
     p = subprocess.Popen(command.split(' '),
+                         bufsize=0,
                          stdout=subprocess.PIPE,
                          stderr=subprocess.STDOUT)
     for line in iter(p.stdout.readline, b''):
