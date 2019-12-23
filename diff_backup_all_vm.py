@@ -4,6 +4,7 @@ import datetime
 import os
 import subprocess
 from typing import IO, Dict
+from timeit import default_timer as timer
 
 year_month = datetime.datetime.now().strftime("%Y-%m")
 all_backup_folder = f'/mnt/lvdump/xdelta3/{year_month}'
@@ -95,27 +96,45 @@ def backup(vm_id, source_folder, backup_folder, data_device, snapshot_device, mo
     return all_ok
 
 
+def elapsed(start):
+    hours, rem = divmod(timer() - start, 3600)
+    minutes, seconds = divmod(rem, 60)
+    return "{:0>2}:{:0>2}:{:0>2}".format(int(hours), int(minutes), int(seconds))
+
+
 def backup_all():
     all_log_file = f'{all_backup_folder}/{dt_str()}-log-all.txt'
     tee.add(all_log_file)
     tee.log(f'Backup started at {dt_str()}')
     tee.log('')
-
+    header = Tee()
+    all_log_header = all_log_file + '.header.txt'
+    header.add(all_log_header)
     failed = []
+    stats = []
     for vm_id in vm_list:
+        start = timer()
         source_folder = f'/mnt/qm-backup/images/{vm_id}'
         backup_folder = f'{all_backup_folder}/backup-{vm_id}'
         log_file = f'{backup_folder}/{dt_str()}-log.txt'
         tee.add(log_file)
         tee.log(f'start backup of {vm_id}')
         tee.indent_inc()
-        if not backup(vm_id, source_folder, backup_folder, data_device, snapshot_device, mount_point):
+        success = backup(vm_id, source_folder, backup_folder, data_device, snapshot_device, mount_point)
+        if not success:
             failed.append(vm_id)
         tee.indent_dec()
+        tee.log('')
+        elap = elapsed(start)
+        stat = f'{vm_id} {elap}{" SUCCESS" if success else " FAILED"}'
+        header.log(stat)
+
+        tee.log(stat)
         tee.log('')
         tee.close(log_file)
 
     success = len(failed) == 0
+    tee.close(all_log_file)
     import platform
 
     subject = f'soyoustart {platform.node()} backup'
@@ -125,7 +144,7 @@ def backup_all():
         tee.log('')
         subject = f'{subject} FAILED [{",".join(failed)}]'
 
-    os.system(f'cat {all_log_file} | admin_email.py "{subject}"')
+    os.system(f'cat {all_log_header} {all_log_file} | admin_email.py "{subject}"')
     return success
 
 

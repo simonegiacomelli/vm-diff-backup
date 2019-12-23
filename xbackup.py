@@ -133,6 +133,7 @@ class xbackup(object):
             if len(os.listdir(self._opt.sourcefolder)) > 0:
                 cmd = "cp -r '" + self._opt.sourcefolder + "/'* '" + newBackupFolderPath + "'"
                 os.system(cmd)
+            self.print_size(newBackupFolderPath)
             return
 
         fullBackupNameList.sort(key=None, reverse=True)
@@ -163,6 +164,10 @@ class xbackup(object):
                                       , newBackupFolderPath + "/" + changed + ".patch"])
             if res != 0:
                 raise Exception("xdelta3 return code failed: " + str(res))
+        self.print_size(newBackupFolderPath)
+
+    def print_size(self, folder):
+        os.system(f'du -h "{folder}"')
 
 
 import unittest
