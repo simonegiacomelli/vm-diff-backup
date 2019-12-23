@@ -137,8 +137,8 @@ def backup_all():
     header.log('VMID STATUS TIME')
     for stat in stats:
         header.log(stat)
-    header.log('')
     header.log(f'TOTAL {elapsed(all_start)}')
+    header.log('')
 
     success = len(failed) == 0
     tee.close(all_log_file)
