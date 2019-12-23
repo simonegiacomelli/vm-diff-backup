@@ -103,6 +103,7 @@ def elapsed(start):
 
 
 def backup_all():
+    all_start = timer()
     all_log_file = f'{all_backup_folder}/{dt_str()}-log-all.txt'
     tee.add(all_log_file)
     tee.log(f'Backup started at {dt_str()}')
@@ -127,11 +128,15 @@ def backup_all():
         tee.log('')
         elap = elapsed(start)
         stat = f'{vm_id} {elap}{" SUCCESS" if success else " FAILED"}'
-        header.log(stat)
+        stats.append(stat)
 
         tee.log(stat)
         tee.log('')
         tee.close(log_file)
+
+    for stat in stats:
+        header.log(stat)
+    header.log(f'TOTAL {elapsed(all_start)}')
 
     success = len(failed) == 0
     tee.close(all_log_file)
