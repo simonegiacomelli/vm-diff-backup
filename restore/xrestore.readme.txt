@@ -1,0 +1,4 @@
+
+cd /cygdrive/g/host.jako.pro/backup/
+./xrestore.py -b ./2018-01/backup-150 -r /cygdrive/c/restore-150
+

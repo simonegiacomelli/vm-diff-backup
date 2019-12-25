@@ -1,0 +1,1 @@
+qemu-system-x86_64 -drive file=vm-111-disk-0.vmdk,format=vmdk -m 2G -device VGA,vgamem_mb=6

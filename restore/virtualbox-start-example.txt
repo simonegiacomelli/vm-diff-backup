@@ -1,0 +1,5 @@
+cd "\Program Files\Oracle\VirtualBox"
+
+VBoxManage.exe clonehd --format VDI \\10.0.0.210\c$\restore-150\vm-150-disk-1.vmdk "c:\Users\Simone\VirtualBox VMs"\vm-150-disk-1.vdi
+
+VBoxManage.exe storageattach vm150 --storagectl SATA --port 1 --device 0 --nonrotational on --discard on --medium "c:\Users\Simone\VirtualBox VMs\vm150\vm-150-disk-1.vdi" --type hdd
