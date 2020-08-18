@@ -80,7 +80,7 @@ class xbackup(object):
         self._parser.add_option("-t", "--timeis", action="store", type="string", dest="timeis",
                                 help="specify current time in format yyyy-MM-dd_hh-mm-ss")
         # not tested 
-        self._parser.add_option("--unittest", action="callback", callback=self.__runTests)
+        self._parser.add_option("--test", action="callback", callback=self.__runTests)
 
         (self._opt, self._leftArgs) = self._parser.parse_args(self._args)
 
