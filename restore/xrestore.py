@@ -122,7 +122,7 @@ class xrestore(object):
         if len(differentialBackupNameList) == 0:
             print("No patch to restore")
             return
-        differentialBackupNameList.sort(cmp=None, key=None, reverse=True)
+        differentialBackupNameList.sort(key=None, reverse=True)
         differentialBackupFolderName = differentialBackupNameList[0]
 
         #newRestoreFolderName = os.path.join(self._opt.backupfolder,
