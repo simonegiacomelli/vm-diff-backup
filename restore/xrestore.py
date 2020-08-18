@@ -128,6 +128,7 @@ class xrestore(object):
 
         if os.path.exists(restore_folder):
             if self._opt.delete_restorefolder:
+                print('recursive remove restore folder [%s]' % restore_folder)
                 import shutil
                 shutil.rmtree(restore_folder)
             else:
