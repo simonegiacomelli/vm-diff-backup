@@ -11,7 +11,8 @@ all_backup_folder = f'/mnt/lvdump/xdelta3/{year_month}'
 mount_point = '/mnt/qm-backup'
 snapshot_device = '/dev/pve/qm-backup'
 data_device = '/dev/pve/data'
-vm_list = '200 100 101 111 150'.split(' ')
+vm_list = '100 103 105 106 182 101 111'.split(' ')
+#vm_list = '182'.split(' ')
 
 
 class Tee:
@@ -49,7 +50,7 @@ class Tee:
 tee = Tee()
 
 
-def ok(command: str, silent=False):
+def ok(command: str, silent=False,tee=tee):
     tee.indent_inc()
     tee.log(f'executing: {command}')
     p = subprocess.Popen(command.split(' '),
@@ -107,6 +108,7 @@ def backup_all():
     all_log_file = f'{all_backup_folder}/{dt_str()}-log-all.txt'
     tee.add(all_log_file)
     tee.log(f'Backup started at {dt_str()}')
+    tee.log(f'This script is {__file__}')
     tee.log('')
     header = Tee()
     all_log_header = all_log_file + '.header.txt'
@@ -139,6 +141,11 @@ def backup_all():
         header.log(stat)
     header.log(f'TOTAL {elapsed(all_start)}')
     header.log('')
+    header.log('')
+    ok('df -h -t ext4',tee=header)
+    header.log('')
+    ok('df -h -x ext4',tee=header);
+    header.log('');
 
     success = len(failed) == 0
     tee.close(all_log_file)
