@@ -83,6 +83,7 @@ class xrestore(object):
                                 help="folder where resides full backup and patch backup")
         self._parser.add_option("-r", "--restorefolder", action="store", type="string", dest="restorefolder",
                                 help="the folder to restore to")
+        self._parser.add_option("--delete-restorefolder", action="store_true")
 
         (self._opt, self._leftArgs) = self._parser.parse_args(self._args)
 
@@ -114,7 +115,7 @@ class xrestore(object):
         if self._opt.backupfolder is None or self._opt.restorefolder is None:
             self._parser.print_help()
             return
-        newRestoreFolderName = self._opt.restorefolder
+        restore_folder = self._opt.restorefolder
 
         backupNameListUnfiltered = os.listdir(self._opt.backupfolder)
         differentialBackupNameList = [el for el in backupNameListUnfiltered
@@ -122,16 +123,18 @@ class xrestore(object):
         if len(differentialBackupNameList) == 0:
             print("No patch to restore")
             return
-        differentialBackupNameList.sort(cmp=None, key=None, reverse=True)
+        differentialBackupNameList.sort(key=None, reverse=True)
         differentialBackupFolderName = differentialBackupNameList[0]
 
-        #newRestoreFolderName = os.path.join(self._opt.backupfolder,
-        #                                    differentialBackupFolderName + ".restore_" + datetime.datetime.now().strftime(
-        #                                        "%Y-%m-%d_%H-%M-%S"))
+        if os.path.exists(restore_folder):
+            if self._opt.delete_restorefolder:
+                print('recursive remove restore folder [%s]' % restore_folder)
+                import shutil
+                shutil.rmtree(restore_folder)
+            else:
+                raise Exception("restore path already exist! " + restore_folder)
 
-        if os.path.exists(newRestoreFolderName):
-            print("restore path already exist! " + newRestoreFolderName)
-            return
+        os.makedirs(restore_folder, exist_ok=True)
 
         ok, diffFolder, fullFolder = self.__decodeDifferentialName(differentialBackupFolderName)
 
@@ -141,9 +144,9 @@ class xrestore(object):
             full = patch[:-6];
             deltaPath = os.path.join(self._opt.backupfolder, differentialBackupFolderName, patch)
             fullPath = os.path.join(self._opt.backupfolder, fullFolder, full)
-            destPath = os.path.join(newRestoreFolderName, full)
-            if not os.path.exists(newRestoreFolderName):
-                os.mkdir(newRestoreFolderName)
+            destPath = os.path.join(restore_folder, full)
+            if not os.path.exists(restore_folder):
+                os.mkdir(restore_folder)
 
             # apply patch //xdelta3.exe -d -s old_file delta_file decoded_new_file
             args = ["xdelta3", "-v", "-d", "-s"

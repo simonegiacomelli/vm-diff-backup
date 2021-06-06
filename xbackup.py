@@ -80,7 +80,7 @@ class xbackup(object):
         self._parser.add_option("-t", "--timeis", action="store", type="string", dest="timeis",
                                 help="specify current time in format yyyy-MM-dd_hh-mm-ss")
         # not tested 
-        self._parser.add_option("--unittest", action="callback", callback=self.__runTests)
+        self._parser.add_option("--test", action="callback", callback=self.__runTests)
 
         (self._opt, self._leftArgs) = self._parser.parse_args(self._args)
 
@@ -196,7 +196,7 @@ class xbackupTest(unittest.TestCase):
 
         backupFolLis = os.listdir(backupFol)
 
-        self.assertEquals(set([folder]), set(backupFolLis))
+        self.assertEqual({folder}, set(backupFolLis))
 
     def testNoBackupAndOneFileInSourceAndNoTimeMock_ShouldCreateBackupFolderWithExpectedMask(self):
         sourceFol = self.__prepareTempFolder("source")
@@ -220,14 +220,14 @@ class xbackupTest(unittest.TestCase):
         target = xbackup(['--backupfolder', backupFol, '--sourcefolder', sourceFol, '--timeis', "2013-07-12_08-01-02"])
         target.backup()
 
-        newBackupFolder = list(set(os.listdir(backupFol)) - set(["2013-07-11_10-59-58"]))
+        newBackupFolder = list(set(os.listdir(backupFol)) - {"2013-07-11_10-59-58"})
 
         self.assertEqual(1, len(newBackupFolder))
         self.assertEqual("2013-07-12_08-01-02-patch-from-2013-07-11_10-59-58", newBackupFolder[0])
 
         newBackupFileLis = list(set(os.listdir(backupFol + "/" + newBackupFolder[0])))
 
-        self.assertEqual(set(["disk.txt.patch"]), set(newBackupFileLis))
+        self.assertEqual({"disk.txt.patch"}, set(newBackupFileLis))
 
     def testOneFullBackupWithTwoFiles_ShouldCreateBackupWithCorrectFolderNameAndXDeltaPatch(self):
         backupFol = self.__prepareTempFolder("backup")
@@ -241,10 +241,10 @@ class xbackupTest(unittest.TestCase):
         target = xbackup(['--backupfolder', backupFol, '--sourcefolder', sourceFol, '--timeis', "2013-05-26_11-40-00"])
         target.backup()
 
-        expectedFiles = set(["disk1.txt.patch", "disk2.txt.patch"])
+        expectedFiles = {"disk1.txt.patch", "disk2.txt.patch"}
         actualFiles = set(os.listdir(backupFol + "/2013-05-26_11-40-00-patch-from-2013-05-25_10-30-00"))
 
-        self.assertEquals(expectedFiles, actualFiles)
+        self.assertEqual(expectedFiles, actualFiles)
 
     def testGarbageInBackupFolder_ShouldIgnoreGarbageAndCreateFullBackup(self):
         (sourceFol, nouse) = self.__prepareTempFolderAndFile("source", "disk.txt", "content of file")
@@ -255,13 +255,13 @@ class xbackupTest(unittest.TestCase):
         target = xbackup(['--backupfolder', backupFol, '--sourcefolder', sourceFol])
         target.backup()
 
-        expectedBackup = list(set(os.listdir(backupFol)) - set(["garbage1"]))
+        expectedBackup = list(set(os.listdir(backupFol)) - {"garbage1"})
 
         self.assertEqual(1, len(expectedBackup))
 
         expectedFileLis = os.listdir(backupFol + "/" + expectedBackup[0])
 
-        self.assertEqual(set(["disk.txt"]), set(expectedFileLis))
+        self.assertEqual({"disk.txt"}, set(expectedFileLis))
 
     def testOneFileFullBackpAndInSourceANewFileExist_ShouldCreatePatchForChangedFileAndCopyNewFile(self):
 
@@ -276,7 +276,7 @@ class xbackupTest(unittest.TestCase):
         target.backup()
 
         newBackupFileSet = set(os.listdir(backupFol + "/2013-07-13_07-03-04-patch-from-2013-07-11_10-12-13"))
-        self.assertEquals(set(["disk.txt.patch", "newdisk.txt"]), newBackupFileSet)
+        self.assertEqual({"disk.txt.patch", "newdisk.txt"}, newBackupFileSet)
 
     def testManyFullBackupInFolder_ShouldUseMostRecentFullBackupForDiff(self):
 
@@ -320,7 +320,7 @@ class xbackupTest(unittest.TestCase):
 
         actualFile = set(os.listdir(backupFol + "/2013-07-19_15-00-00-patch-from-2013-07-18_10-00-00"))
 
-        self.assertEquals(set(["disk1.txt.wasremoved"]), actualFile)
+        self.assertEqual({"disk1.txt.wasremoved"}, actualFile)
 
     #    def testPatchOfOneChangedFileAndApplyPatch_ShouldGenerateOriginalFolder(self):
     #        raise NotImplemented("creare un'altro batch? tipo xrestore?")
