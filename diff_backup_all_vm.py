@@ -11,7 +11,7 @@ all_backup_folder = f'/mnt/lvdump/xdelta3/{year_month}'
 mount_point = '/mnt/qm-backup'
 snapshot_device = '/dev/pve/qm-backup'
 data_device = '/dev/pve/data'
-vm_list = '103 105 106 182 101 111'.split(' ')
+vm_list = '103 105 106 182 111'.split(' ')
 #vm_list = '182'.split(' ')
 
 
